@@ -1,54 +1,86 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment, Float, Decal, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
-// A simplified procedural T-Shirt mesh since we can't load external GLBs easily in this demo environment without CORS
-// In a real app, you would use useGLTF('path/to/shirt.glb')
-
-const TShirtMesh = ({ color, decalImage }: { color: string; decalImage?: string | null }) => {
+const TShirtMesh = ({ color, stampUrl }: { color: string; stampUrl: string }) => {
   const meshRef = useRef<THREE.Group>(null);
   
-  // Create a material that responds well to light
-  const material = new THREE.MeshStandardMaterial({
+  // Material físico avanzado para simular tela (Cotton/Premium feel)
+  const material = useMemo(() => new THREE.MeshPhysicalMaterial({
     color: color,
-    roughness: 0.3,
-    metalness: 0.1,
-  });
+    roughness: 0.85,
+    metalness: 0.05,
+    sheen: 1,
+    sheenRoughness: 0.5,
+    sheenColor: new THREE.Color(color).lerp(new THREE.Color('#ffffff'), 0.2),
+    side: THREE.DoubleSide,
+  }), [color]);
+
+  const texture = useTexture(stampUrl);
 
   useFrame((state) => {
     if (meshRef.current) {
-        // Subtle breathing animation
-        meshRef.current.position.y = Math.sin(state.clock.getElapsedTime()) * 0.05;
+        // Suave balanceo para dar vida a la prenda
+        meshRef.current.position.y = Math.sin(state.clock.getElapsedTime() * 0.8) * 0.03;
+        meshRef.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.5) * 0.05;
     }
   });
 
   return (
-    <group ref={meshRef} dispose={null} scale={[2.5, 2.5, 2.5]}>
-       {/* Torso */}
+    <group ref={meshRef} dispose={null} scale={[2.8, 2.8, 2.8]}>
+      {/* Cuerpo Principal (Torso con forma anatómica) */}
       <mesh position={[0, 0, 0]} castShadow receiveShadow material={material}>
-        <boxGeometry args={[1, 1.4, 0.5]} />
+        <cylinderGeometry args={[0.38, 0.42, 1.2, 32]} />
+        <mesh scale={[1.1, 1, 0.5]}>
+            <cylinderGeometry args={[0.38, 0.42, 1.2, 32]} />
+        </mesh>
+        
+        {/* Estampa con Decal (Ajustada a la forma) */}
+        <Decal
+          position={[0, 0.15, 0.21]} 
+          rotation={[0, 0, 0]}
+          scale={[0.45, 0.45, 1]}
+        >
+          <meshBasicMaterial 
+            map={texture} 
+            transparent 
+            polygonOffset 
+            polygonOffsetFactor={-1} 
+          />
+        </Decal>
       </mesh>
       
-      {/* Shoulders/Sleeves - Simplified blocky representation for style */}
-      <mesh position={[-0.65, 0.4, 0]} castShadow receiveShadow material={material}>
-        <boxGeometry args={[0.5, 0.5, 0.4]} />
-      </mesh>
-      <mesh position={[0.65, 0.4, 0]} castShadow receiveShadow material={material}>
-        <boxGeometry args={[0.5, 0.5, 0.4]} />
+      {/* Manga Izquierda (Angulada y Realista) */}
+      <group position={[-0.45, 0.4, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <mesh material={material}>
+          <cylinderGeometry args={[0.18, 0.15, 0.5, 32]} />
+          <mesh scale={[1, 1, 0.5]}>
+             <cylinderGeometry args={[0.18, 0.15, 0.5, 32]} />
+          </mesh>
+        </mesh>
+      </group>
+
+      {/* Manga Derecha */}
+      <group position={[0.45, 0.4, 0]} rotation={[0, 0, -Math.PI / 4]}>
+        <mesh material={material}>
+          <cylinderGeometry args={[0.18, 0.15, 0.5, 32]} />
+          <mesh scale={[1, 1, 0.5]}>
+             <cylinderGeometry args={[0.18, 0.15, 0.5, 32]} />
+          </mesh>
+        </mesh>
+      </group>
+
+      {/* Cuello (Circular Suave) */}
+      <mesh position={[0, 0.58, 0]} rotation={[Math.PI / 2, 0, 0]} material={material}>
+        <torusGeometry args={[0.18, 0.04, 16, 100]} />
       </mesh>
 
-       {/* Neck */}
-       <mesh position={[0, 0.7, 0]} material={material}>
-          <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
-       </mesh>
-
-       {/* Decal Area - if an image is provided (simulated here with a color block for demo if no real texture loaded) */}
-       <mesh position={[0, 0.1, 0.26]}>
-          <planeGeometry args={[0.6, 0.6]} />
-          <meshBasicMaterial color={decalImage ? "#ffffff" : color} transparent opacity={decalImage ? 1 : 0} map={null} /> 
-          {/* Note: useTexture would be used here with the decalImage prop in a real scenario */}
-       </mesh>
+      {/* Sombra de oclusión interna */}
+      <mesh position={[0, 0.57, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.16, 32]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.6} side={THREE.BackSide} />
+      </mesh>
     </group>
   );
 };
@@ -56,23 +88,33 @@ const TShirtMesh = ({ color, decalImage }: { color: string; decalImage?: string 
 interface SceneProps {
   color: string;
   className?: string;
-  imageUrl?: string;
+  stampUrl: string;
 }
 
-export const Scene3D: React.FC<SceneProps> = ({ color, className, imageUrl }) => {
+export const Scene3D: React.FC<SceneProps> = ({ color, className, stampUrl }) => {
   return (
     <div className={`w-full h-full min-h-[400px] ${className}`}>
-      <Canvas shadows camera={{ position: [0, 0, 4], fov: 50 }}>
-        <ambientLight intensity={0.7} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} shadow-mapSize={2048} castShadow />
+      <Canvas shadows camera={{ position: [0, 0, 4.5], fov: 40 }} dpr={[1, 2]}>
+        <ambientLight intensity={0.4} />
+        <pointLight position={[5, 5, 5]} intensity={1.5} castShadow />
+        <spotLight position={[-5, 5, 5]} angle={0.2} penumbra={1} intensity={1} />
         
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-            <TShirtMesh color={color} decalImage={imageUrl} />
+        <Float speed={2} rotationIntensity={0.1} floatIntensity={0.2}>
+            <TShirtMesh color={color} stampUrl={stampUrl} />
         </Float>
         
-        <ContactShadows position={[0, -1.5, 0]} opacity={0.4} scale={10} blur={2.5} far={4} color="#00f2ff" />
+        <ContactShadows position={[0, -1.8, 0]} opacity={0.4} scale={12} blur={2} far={4} color="#000000" />
         <Environment preset="city" />
-        <OrbitControls enablePan={false} minPolarAngle={Math.PI / 2.5} maxPolarAngle={Math.PI / 2} />
+        
+        <OrbitControls 
+          enablePan={false} 
+          minPolarAngle={Math.PI / 3} 
+          maxPolarAngle={Math.PI / 1.5} 
+          minDistance={3}
+          maxDistance={7}
+          autoRotate={false}
+          enableDamping={true}
+        />
       </Canvas>
     </div>
   );

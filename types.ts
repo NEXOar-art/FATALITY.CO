@@ -3,24 +3,29 @@ export interface Product {
   name: string;
   price: number;
   author: string;
-  image: string; // Background image for the card
+  image: string; // This is the 'stamp' image URL
   description: string;
-  baseColor: string; // Hex for 3D model
+  baseColor: string; // Current selected hex
+  stamp: string; // Path to the stamp image
 }
 
 export interface CartItem extends Product {
   cartId: string;
   quantity: number;
   size: string;
-  customColor?: string;
+  customColor: string;
+  colorName: string;
 }
 
 export type ViewState = 'gallery' | 'details' | 'cart' | 'checkout' | 'success';
 
 export interface UserDetails {
   fullName: string;
+  dni: string;
   email: string;
-  address: string;
+  phone: string;
+  neighborhood: string;
   city: string;
+  province: string;
   zip: string;
 }

@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fatality.Co</title>
-    <!-- Google Fonts -->
+    <title>FATALITY | Streetwear Minimal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -19,15 +14,13 @@
         theme: {
           extend: {
             colors: {
-              primary: "#00f2ff",
-              "background-light": "#f5f8f8",
-              "background-dark": "#101818",
-              "card-dark": "#162121",
-              "border-dark": "#27393a",
+              primary: "#ff3e3e",
+              accent: "#ff3e3e",
+              "bg-dark": "#111111",
+              "card-glass": "rgba(255, 255, 255, 0.05)",
             },
             fontFamily: {
-              display: ["Inter", "sans-serif"],
-              sans: ["Inter", "sans-serif"],
+              sans: ["Montserrat", "sans-serif"],
             },
           },
         },
@@ -35,55 +28,100 @@
     </script>
     <style>
       body {
-        font-family: 'Inter', sans-serif;
+        background-color: #0a0a0a;
+        color: white;
+        overflow-x: hidden;
       }
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #101818;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #27393a;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #00f2ff;
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes scaleUp {
-        from { transform: scale(0.95); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+      
+      /* Paradox / Parallax Background */
+      .bg-parallax {
+        position: fixed;
+        top: 0; left: 0;
+        width: 110%; height: 110%;
+        z-index: -1;
+        background: 
+          linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+          url('https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=2070&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        transform: translate(-5%, -5%);
+        filter: contrast(1.1) brightness(0.7);
       }
 
-      .animate-fade-in {
-        animation: fadeIn 0.3s ease-out forwards;
+      /* Scanline Effect layer */
+      .bg-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        background-size: 100% 3px, 3px 100%;
+        opacity: 0.3;
       }
 
-      .animate-scale-up {
-        animation: scaleUp 0.3s ease-out forwards;
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #0a0a0a; }
+      ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #ff3e3e; }
+
+      .glass {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
+
+      .btn-nomad {
+        background: #111;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 1;
+      }
+      .btn-nomad::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 0%; height: 100%;
+        background: #ff3e3e; z-index: -1; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+      .btn-nomad:hover::before { width: 100%; }
+      .btn-nomad:hover { color: white; border-color: #ff3e3e; }
+
+      /* Card Hover Effect - Perspective */
+      .card-3d-container {
+        perspective: 1200px;
+      }
+      .card-3d-inner {
+        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        transform-style: preserve-3d;
+      }
+      .card-3d-container:hover .card-3d-inner {
+        transform: rotateX(4deg) rotateY(-4deg) translateY(-8px);
+      }
+
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+      .animate-view { animation: fadeIn 0.6s ease-out forwards; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "three": "https://esm.sh/three@^0.182.0",
-    "@react-three/drei": "https://esm.sh/@react-three/drei@^10.7.7",
-    "@react-three/fiber": "https://esm.sh/@react-three/fiber@^9.4.2"
-  }
-}
-</script>
-</head>
-  <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased">
+    <script type="importmap">
+    {
+      "imports": {
+        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "three": "https://esm.sh/three@^0.182.0",
+        "@react-three/drei": "https://esm.sh/@react-three/drei@^10.7.7",
+        "@react-three/fiber": "https://esm.sh/@react-three/fiber@^9.4.2"
+      }
+    }
+    </script>
+  </head>
+  <body class="font-sans antialiased">
+    <div class="bg-parallax"></div>
+    <div class="bg-overlay"></div>
     <div id="root"></div>
+    <audio id="bg-music" loop>
+      <source src="Nocturna en Buenos Aires.mp3" type="audio/mpeg">
+    </audio>
   </body>
 </html>
